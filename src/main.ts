@@ -248,6 +248,9 @@ async function loadLocalPostmanCollections(folder: string): Promise<void> {
   core.info(
     `${localPostmanCollections.length} JSON Postman Collection(s) found in ${folder}`
   )
+  core.info(
+    `${localPostmanCollections.length} JSON Postman Collection(s) found in ${folder}`
+  )
 }
 
 run()
