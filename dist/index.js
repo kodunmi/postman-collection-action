@@ -7,6 +7,15 @@ require('./sourcemap-register.js');module.exports =
 
 "use strict";
 
+// import * as core from '@actions/core'
+// import * as glob from '@actions/glob'
+// import {promises} from 'fs'
+// import axios, {AxiosInstance, AxiosResponse} from 'axios'
+// import {
+//   LocalCollection,
+//   RemoteCollection,
+//   RemoteCollectionContainer
+// } from './types'
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
@@ -46,13 +55,136 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
+// const localPostmanCollections: LocalCollection[] = []
+// const localPostmanCollectionFileMap: Map<string, string> = new Map()
+// const remotePostmanCollectionsMap: Map<string, RemoteCollection> = new Map()
+// const restClient: AxiosInstance = axios.create({
+//   baseURL: 'https://api.getpostman.com',
+//   timeout: Number(core.getInput('postmanTimeout')) || 15000,
+//   headers: {
+//     'X-Api-Key': core.getInput('postmanApiKey')
+//   }
+// })
+// const postmanWorkspaceId = core.getInput('postmanWorkspaceId')
+// async function run(): Promise<void> {
+//   try {
+//     await Promise.all([
+//       loadLocalPostmanCollections(),
+//       loadRemotePostmanCollections()
+//     ])
+//     if (localPostmanCollections.length === 0) {
+//       // No local postman collections found so exit early
+//       return
+//     }
+//     await Promise.all(
+//       localPostmanCollections.map(async (localCollection: LocalCollection) => {
+//         try {
+//           // const remoteCollection: RemoteCollection | undefined =
+//           //   remotePostmanCollectionsMap.get(localCollection.info._postman_id)
+//           let response: AxiosResponse<RemoteCollectionContainer>
+//           // Collection not found in Remote Workspace so send a POST Request to create the collection
+//           const createURi: string = postmanWorkspaceId
+//             ? `/collections?workspace=${postmanWorkspaceId}`
+//             : `/collections`
+//           response = await restClient.post(createURi, {
+//             collection: localCollection
+//           })
+//           if (
+//             localCollection.info._postman_id !== response.data.collection.id
+//           ) {
+//             // IDs are different, update local file
+//             const oldId: string = localCollection.info._postman_id
+//             const localPath: string | undefined =
+//               localPostmanCollectionFileMap.get(oldId)
+//             if (localPath) {
+//               localCollection.info._postman_id = response.data.collection.id
+//               await promises.writeFile(
+//                 localPath,
+//                 JSON.stringify(localCollection, null, '\t')
+//               )
+//             }
+//           }
+//           localCollection.info._postman_id = response.data.collection.id
+//           core.info(
+//             `Successfully created collection ${response.data?.collection?.name} with Postman ID ${response.data?.collection?.id}`
+//           )
+//         } catch (error) {
+//           core.error(
+//             `Status ${error.response?.status} - Unable to process collection ${localCollection.info.name} with Postman ID ${localCollection.info._postman_id} due to: ${error.response?.data?.error?.message}`
+//           )
+//           core.setFailed(
+//             `Errors processing Postman Collection(s) - Please see the output above`
+//           )
+//         }
+//       })
+//     )
+//   } catch (error) {
+//     core.setFailed(error.message)
+//   }
+// }
+// async function loadRemotePostmanCollections(): Promise<void> {
+//   try {
+//     const {data} = await restClient.get('/collections')
+//     for (const remoteCollection of data.collections.filter(
+//       (collection: RemoteCollection) => !collection.fork
+//     )) {
+//       remotePostmanCollectionsMap.set(remoteCollection.id, remoteCollection)
+//     }
+//     core.info(
+//       `${remotePostmanCollectionsMap.size} Non-Forked Collection(s) found for the given API Key in Remote Postman`
+//     )
+//   } catch (error) {
+//     core.setFailed(
+//       `Status ${error.response?.status} - Response: ${error.response?.data}`
+//     )
+//     throw new Error(`Unable to fetch Remote Collections from Postman Workspace`)
+//   }
+// }
+// async function loadLocalPostmanCollections(): Promise<void> {
+//   // Recursively search through the Repository files for JSON Files
+//   const jsonPattern = `**/*.json`
+//   const globber: glob.Globber = await glob.create(jsonPattern)
+//   const files: string[] = []
+//   for await (const file of globber.globGenerator()) {
+//     // Store the file name(s)
+//     files.push(file)
+//   }
+//   core.info(`${files.length} JSON File(s) Found`)
+//   if (files.length === 0) {
+//     return
+//   }
+//   // Wait for all files to be processed before progressing
+//   await Promise.all(
+//     files.map(async file => {
+//       // Read the file content in memory and convert to JSON
+//       try {
+//         const jsonContent = JSON.parse(
+//           (await promises.readFile(file)).toString()
+//         )
+//         // Check if the JSON file is a "valid" Postman v2.1 Collection, when true store in array
+//         if (
+//           jsonContent?.info?.schema ===
+//           `https://schema.getpostman.com/json/collection/v2.1.0/collection.json`
+//         ) {
+//           localPostmanCollections.push(jsonContent)
+//           localPostmanCollectionFileMap.set(jsonContent.info._postman_id, file)
+//         }
+//       } catch (e) {
+//         // If JSON can't be parsed it's not valid so ignore
+//       }
+//     })
+//   )
+//   core.info(
+//     `${localPostmanCollections.length} JSON Postman Collection(s) found`
+//   )
+// }
+// run()
 const core = __importStar(__webpack_require__(2186));
 const glob = __importStar(__webpack_require__(8090));
 const fs_1 = __webpack_require__(5747);
 const axios_1 = __importDefault(__webpack_require__(6545));
 const localPostmanCollections = [];
 const localPostmanCollectionFileMap = new Map();
-const remotePostmanCollectionsMap = new Map();
 const restClient = axios_1.default.create({
     baseURL: 'https://api.getpostman.com',
     timeout: Number(core.getInput('postmanTimeout')) || 15000,
@@ -60,14 +192,10 @@ const restClient = axios_1.default.create({
         'X-Api-Key': core.getInput('postmanApiKey')
     }
 });
-const postmanWorkspaceId = core.getInput('postmanWorkspaceId');
 function run() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            yield Promise.all([
-                loadLocalPostmanCollections(),
-                loadRemotePostmanCollections()
-            ]);
+            yield loadLocalPostmanCollections('storage/app/postman');
             if (localPostmanCollections.length === 0) {
                 // No local postman collections found so exit early
                 return;
@@ -75,38 +203,17 @@ function run() {
             yield Promise.all(localPostmanCollections.map((localCollection) => __awaiter(this, void 0, void 0, function* () {
                 var _a, _b, _c, _d, _e, _f, _g, _h;
                 try {
-                    const remoteCollection = remotePostmanCollectionsMap.get(localCollection.info._postman_id);
-                    let response;
-                    if (!remoteCollection) {
-                        // Collection not found in Remote Workspace so send a POST Request to create the collection
-                        const createURi = postmanWorkspaceId
-                            ? `/collections?workspace=${postmanWorkspaceId}`
-                            : `/collections`;
-                        response = yield restClient.post(createURi, {
-                            collection: localCollection
-                        });
-                        if (localCollection.info._postman_id !== response.data.collection.id) {
-                            // IDs are different, update local file
-                            const oldId = localCollection.info._postman_id;
-                            const localPath = localPostmanCollectionFileMap.get(oldId);
-                            if (localPath) {
-                                localCollection.info._postman_id = response.data.collection.id;
-                                yield fs_1.promises.writeFile(localPath, JSON.stringify(localCollection, null, '\t'));
-                            }
-                        }
-                        localCollection.info._postman_id = response.data.collection.id;
-                    }
-                    else {
-                        // This is the tricky bit, I don't want to compare if collections are different so always trigger the PUT Request
-                        // Consider using the GitHub Action trigger filters to only execute this action when json files change
-                        response = yield restClient.put(`/collections/${remoteCollection.uid}`, {
-                            collection: localCollection
-                        });
-                    }
-                    core.info(`Successfully ${remoteCollection ? 'updated' : 'created'} collection ${(_b = (_a = response.data) === null || _a === void 0 ? void 0 : _a.collection) === null || _b === void 0 ? void 0 : _b.name} with Postman ID ${(_d = (_c = response.data) === null || _c === void 0 ? void 0 : _c.collection) === null || _d === void 0 ? void 0 : _d.id}`);
+                    // Send a POST Request to create the collection
+                    const createURi = core.getInput('postmanWorkspaceId')
+                        ? `/collections?workspace=${core.getInput('postmanWorkspaceId')}`
+                        : `/collections`;
+                    const response = yield restClient.post(createURi, {
+                        collection: localCollection
+                    });
+                    core.info(`Successfully created collection ${(_b = (_a = response.data) === null || _a === void 0 ? void 0 : _a.collection) === null || _b === void 0 ? void 0 : _b.name} with Postman ID ${(_d = (_c = response.data) === null || _c === void 0 ? void 0 : _c.collection) === null || _d === void 0 ? void 0 : _d.id}`);
                 }
                 catch (error) {
-                    core.error(`Status ${(_e = error.response) === null || _e === void 0 ? void 0 : _e.status} - Unable to process collection ${localCollection.info.name} with Postman ID ${localCollection.info._postman_id} due to: ${(_h = (_g = (_f = error.response) === null || _f === void 0 ? void 0 : _f.data) === null || _g === void 0 ? void 0 : _g.error) === null || _h === void 0 ? void 0 : _h.message}`);
+                    core.error(`Error creating collection: ${(_e = error.response) === null || _e === void 0 ? void 0 : _e.status} - ${(_h = (_g = (_f = error.response) === null || _f === void 0 ? void 0 : _f.data) === null || _g === void 0 ? void 0 : _g.error) === null || _h === void 0 ? void 0 : _h.message}`);
                     core.setFailed(`Errors processing Postman Collection(s) - Please see the output above`);
                 }
             })));
@@ -116,27 +223,11 @@ function run() {
         }
     });
 }
-function loadRemotePostmanCollections() {
-    var _a, _b;
-    return __awaiter(this, void 0, void 0, function* () {
-        try {
-            const { data } = yield restClient.get('/collections');
-            for (const remoteCollection of data.collections.filter((collection) => !collection.fork)) {
-                remotePostmanCollectionsMap.set(remoteCollection.id, remoteCollection);
-            }
-            core.info(`${remotePostmanCollectionsMap.size} Non-Forked Collection(s) found for the given API Key in Remote Postman`);
-        }
-        catch (error) {
-            core.setFailed(`Status ${(_a = error.response) === null || _a === void 0 ? void 0 : _a.status} - Response: ${(_b = error.response) === null || _b === void 0 ? void 0 : _b.data}`);
-            throw new Error(`Unable to fetch Remote Collections from Postman Workspace`);
-        }
-    });
-}
-function loadLocalPostmanCollections() {
+function loadLocalPostmanCollections(folder) {
     var e_1, _a;
     return __awaiter(this, void 0, void 0, function* () {
-        // Recursively search through the Repository files for JSON Files
-        const jsonPattern = `**/*.json`;
+        // Search for JSON files in the specified folder
+        const jsonPattern = `${folder}/**/*.json`;
         const globber = yield glob.create(jsonPattern);
         const files = [];
         try {
@@ -153,7 +244,7 @@ function loadLocalPostmanCollections() {
             }
             finally { if (e_1) throw e_1.error; }
         }
-        core.info(`${files.length} JSON File(s) Found`);
+        core.info(`${files.length} JSON File(s) Found in ${folder}`);
         if (files.length === 0) {
             return;
         }
@@ -171,10 +262,11 @@ function loadLocalPostmanCollections() {
                 }
             }
             catch (e) {
-                // If JSON can't be parsed it's not valid so ignore
+                // If JSON can't be parsed, it's not valid, so ignore
             }
         })));
-        core.info(`${localPostmanCollections.length} JSON Postman Collection(s) found`);
+        core.info(`${localPostmanCollections.length} JSON Postman Collection(s) found in ${folder}`);
+        core.info(`${localPostmanCollections.length} JSON Postman Collection(s) found in ${folder}`);
     });
 }
 run();
