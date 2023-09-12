@@ -37,52 +37,37 @@ async function run(): Promise<void> {
     await Promise.all(
       localPostmanCollections.map(async (localCollection: LocalCollection) => {
         try {
-          const remoteCollection: RemoteCollection | undefined =
-            remotePostmanCollectionsMap.get(localCollection.info._postman_id)
+          // const remoteCollection: RemoteCollection | undefined =
+          //   remotePostmanCollectionsMap.get(localCollection.info._postman_id)
 
           let response: AxiosResponse<RemoteCollectionContainer>
 
-          if (!remoteCollection) {
-            // Collection not found in Remote Workspace so send a POST Request to create the collection
-            const createURi: string = postmanWorkspaceId
-              ? `/collections?workspace=${postmanWorkspaceId}`
-              : `/collections`
-            response = await restClient.post(createURi, {
-              collection: localCollection
-            })
-            if (
-              localCollection.info._postman_id !== response.data.collection.id
-            ) {
-              // IDs are different, update local file
-              const oldId: string = localCollection.info._postman_id
-              const localPath: string | undefined =
-                localPostmanCollectionFileMap.get(oldId)
-              if (localPath) {
-                localCollection.info._postman_id = response.data.collection.id
-                await promises.writeFile(
-                  localPath,
-                  JSON.stringify(localCollection, null, '\t')
-                )
-              }
+          // Collection not found in Remote Workspace so send a POST Request to create the collection
+          const createURi: string = postmanWorkspaceId
+            ? `/collections?workspace=${postmanWorkspaceId}`
+            : `/collections`
+          response = await restClient.post(createURi, {
+            collection: localCollection
+          })
+          if (
+            localCollection.info._postman_id !== response.data.collection.id
+          ) {
+            // IDs are different, update local file
+            const oldId: string = localCollection.info._postman_id
+            const localPath: string | undefined =
+              localPostmanCollectionFileMap.get(oldId)
+            if (localPath) {
+              localCollection.info._postman_id = response.data.collection.id
+              await promises.writeFile(
+                localPath,
+                JSON.stringify(localCollection, null, '\t')
+              )
             }
-            localCollection.info._postman_id = response.data.collection.id
-          } else {
-            // This is the tricky bit, I don't want to compare if collections are different so always trigger the PUT Request
-            // Consider using the GitHub Action trigger filters to only execute this action when json files change
-            response = await restClient.put(
-              `/collections/${remoteCollection.uid}`,
-              {
-                collection: localCollection
-              }
-            )
           }
+          localCollection.info._postman_id = response.data.collection.id
 
           core.info(
-            `Successfully ${
-              remoteCollection ? 'updated' : 'created'
-            } collection ${response.data?.collection?.name} with Postman ID ${
-              response.data?.collection?.id
-            }`
+            `Successfully created collection ${response.data?.collection?.name} with Postman ID ${response.data?.collection?.id}`
           )
         } catch (error) {
           core.error(
