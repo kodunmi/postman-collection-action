@@ -153,8 +153,8 @@
 import * as core from '@actions/core'
 import * as glob from '@actions/glob'
 import {promises} from 'fs'
-import axios from 'axios'
-import {AxiosInstance} from 'axios'
+import axios, {AxiosInstance} from 'axios'
+// import {AxiosInstance} from 'axios'
 import {LocalCollection} from './types'
 
 const localPostmanCollections: LocalCollection[] = []
